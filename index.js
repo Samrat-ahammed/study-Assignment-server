@@ -68,8 +68,15 @@ async function run() {
           date: updateProduct.date,
         },
       };
-
       const result = await assignmentCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
+    app.delete("/allAssignment/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = { _id: new ObjectId(id) };
+      const result = await assignmentCollection.deleteOne(query);
       res.send(result);
     });
 
