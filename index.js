@@ -43,7 +43,6 @@ async function run() {
 
     app.post("/allAssignment", async (req, res) => {
       const assignment = req.body;
-      console.log(assignment);
       const result = await assignmentCollection.insertOne(assignment);
       res.send(result);
     });
@@ -77,7 +76,6 @@ async function run() {
 
     app.delete("/allAssignment/:id", async (req, res) => {
       const id = req.params.id;
-      console.log(id);
       const query = { _id: new ObjectId(id) };
       const result = await assignmentCollection.deleteOne(query);
       res.send(result);
@@ -100,15 +98,15 @@ async function run() {
     // });
 
     app.get("/takeAssignment", async (req, res) => {
-      const cursor = takeAssignmentCollection.find();
+      const { email } = req.query;
+      const cursor = takeAssignmentCollection.find({ userEmail: email });
       const result = await cursor.toArray();
-      console.log(result);
+      // console.log(result);
       res.send(result);
     });
 
     app.post("/takeAssignment", async (req, res) => {
       const takeAssign = req.body;
-      console.log(takeAssign);
       const result = await takeAssignmentCollection.insertOne(takeAssign);
       res.send(result);
     });
@@ -122,7 +120,6 @@ async function run() {
 
     app.put("/takeAssignment/:id", async (req, res) => {
       const id = req.params.id;
-      console.log(id);
       const filter = { _id: new ObjectId(id) };
       const updateProduct = req.body;
 
@@ -137,6 +134,14 @@ async function run() {
         filter,
         updateDoc
       );
+      res.send(result);
+    });
+
+    app.delete("/takeAssignment/:id", async (req, res) => {
+      const id = req.params.id;
+      // console.log(id);
+      const query = { _id: new ObjectId(id) };
+      const result = await takeAssignmentCollection.deleteOne(query);
       res.send(result);
     });
 
