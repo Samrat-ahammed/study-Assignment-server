@@ -31,6 +31,9 @@ async function run() {
     const assignmentCollection = client
       .db("assignmentDB")
       .collection("allAssignment");
+    const takeAssignmentCollection = client
+      .db("takeAssignmentDb")
+      .collection("takeAssignment");
 
     app.get("/allAssignment", async (req, res) => {
       const cursor = assignmentCollection.find();
@@ -39,9 +42,9 @@ async function run() {
     });
 
     app.post("/allAssignment", async (req, res) => {
-      const booking = req.body;
-      console.log(booking);
-      const result = await assignmentCollection.insertOne(booking);
+      const assignment = req.body;
+      console.log(assignment);
+      const result = await assignmentCollection.insertOne(assignment);
       res.send(result);
     });
 
@@ -80,19 +83,60 @@ async function run() {
       res.send(result);
     });
 
-    app.patch("/allAssignment/:id", async (req, res) => {
+    // app.patch("/allAssignment/:id", async (req, res) => {
+    //   const id = req.params.id;
+    //   const filter = { _id: new ObjectId(id) };
+    //   const updateChecking = req.body;
+    //   // console.log(updateChecking);
+    //   const updateDoc = {
+    //     $set: {
+    //       status: updateChecking.status,
+    //     },
+    //   };
+
+    //   const result = await assignmentCollection.updateOne(filter, updateDoc);
+    //   console.log(result);
+    //   res.send(result);
+    // });
+
+    app.get("/takeAssignment", async (req, res) => {
+      const cursor = takeAssignmentCollection.find();
+      const result = await cursor.toArray();
+      console.log(result);
+      res.send(result);
+    });
+
+    app.post("/takeAssignment", async (req, res) => {
+      const takeAssign = req.body;
+      console.log(takeAssign);
+      const result = await takeAssignmentCollection.insertOne(takeAssign);
+      res.send(result);
+    });
+
+    app.get("/takeAssignment/:status", async (req, res) => {
+      const status = req.params.status;
+      const query = { status: status };
+      const result = await takeAssignmentCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.put("/takeAssignment/:id", async (req, res) => {
       const id = req.params.id;
+      console.log(id);
       const filter = { _id: new ObjectId(id) };
-      const updateChecking = req.body;
-      // console.log(updateChecking);
+      const updateProduct = req.body;
+
       const updateDoc = {
         $set: {
-          status: updateChecking.status,
+          giveMark: updateProduct.giveMark,
+          status: updateProduct.status,
         },
       };
 
-      const result = await assignmentCollection.updateOne(filter, updateDoc);
-      console.log(result);
+      const result = await takeAssignmentCollection.updateOne(
+        filter,
+        updateDoc
+      );
       res.send(result);
     });
 
