@@ -12,21 +12,17 @@ const port = process.env.PORT || 5000;
 app.use(
   cors({
     origin: [
-      "https://study-assignment-f59be.web.app/",
-      "https://study-assignment-f59be.firebaseapp.com/",
+      "https://app.netlify.com/sites/courageous-liger-ff4d25/deploys/654bc69a1318871b0d7f646c",
     ],
+    optionSuccessStatus: 200,
     credentials: true,
   })
 );
-app.use(express.json());
 app.use(cookieParser());
-
-// samratahammed29
-// uK2a2DjvyJHj7JJE
+app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.kbligoj.mongodb.net/?retryWrites=true&w=majority`;
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -54,7 +50,7 @@ const verifyToken = async (req, res, next) => {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     app.post("/jwt", async (req, res) => {
       const user = req.body;
@@ -201,12 +197,6 @@ async function run() {
       const result = await userCollection.insertOne(user);
       res.send(result);
     });
-
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
