@@ -27,26 +27,21 @@ const client = new MongoClient(uri, {
   },
 });
 
-const logger = async (req, res, next) => {
-  console.log("called", req.host, req.originalUrl);
-  next();
+const verifyToken = async (req, res, next) => {
+  const token = req.cookies?.token;
+  console.log("value of token of middleware", token);
+  if (!token) {
+    return res.status(401).send({ message: "forbidden" });
+  }
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decode) => {
+    if (err) {
+      return res.status(401).send({ message: "unauthorized" });
+    }
+    console.log("value in token ", decode);
+    req.user = decode;
+    next();
+  });
 };
-
-// const verifyToken = async (req, res, next) => {
-//   const token = req.cookies?.token;
-//   console.log("value of token of middleware", token);
-//   if (!token) {
-//     return res.status(401).send({ message: "forbidden" });
-//   }
-//   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decode) => {
-//     if (err) {
-//       return res.status(401).send({ message: "unauthorized" });
-//     }
-//     console.log("value in token ", decode);
-//     req.user = decode;
-//     next();
-//   });
-// };
 
 async function run() {
   try {
@@ -78,13 +73,20 @@ async function run() {
     const userCollection = client.db("userDB").collection("user");
 
     app.get("/allAssignment", async (req, res) => {
-      const cursor = assignmentCollection.find();
+      const { level } = req.query;
+      let query = {};
+      if (level) {
+        query = { level: level };
+      }
+
+      const cursor = assignmentCollection.find(query);
       const result = await cursor.toArray();
       res.send(result);
     });
 
     app.post("/allAssignment", async (req, res) => {
       const assignment = req.body;
+
       const result = await assignmentCollection.insertOne(assignment);
       res.send(result);
     });
@@ -123,12 +125,12 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/takeAssignment", async (req, res) => {
+    app.get("/takeAssignment", verifyToken, async (req, res) => {
       const { email } = req.query;
       console.log("token:", req.cookies.token);
-      // if (req.query.email !== req.user.email) {
-      //   return res.status(403).send({ message: "forbidden access" });
-      // }
+      if (req.query.email !== req.user.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
       let query = {};
       if (req.query?.email) {
         query = { email: req.query.email };
