@@ -35,6 +35,8 @@ async function run() {
       .db("takeAssignmentDb")
       .collection("takeAssignment");
 
+    const userCollection = client.db("userDB").collection("user");
+
     app.get("/allAssignment", async (req, res) => {
       const cursor = assignmentCollection.find();
       const result = await cursor.toArray();
@@ -99,9 +101,14 @@ async function run() {
 
     app.get("/takeAssignment", async (req, res) => {
       const { email } = req.query;
-      const cursor = takeAssignmentCollection.find({ userEmail: email });
+
+      let query = {};
+      if (req.query?.email) {
+        query = { email: req.query.email };
+      }
+      console.log(query);
+      const cursor = takeAssignmentCollection.find(query);
       const result = await cursor.toArray();
-      // console.log(result);
       res.send(result);
     });
 
@@ -142,6 +149,19 @@ async function run() {
       // console.log(id);
       const query = { _id: new ObjectId(id) };
       const result = await takeAssignmentCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    app.get("/user", async (req, res) => {
+      const cursor = userCollection.find();
+      const user = await cursor.toArray();
+      res.send(user);
+    });
+
+    app.post("/user", async (req, res) => {
+      const user = req.body;
+      console.log(user);
+      const result = await userCollection.insertOne(user);
       res.send(result);
     });
 
