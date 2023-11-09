@@ -12,9 +12,9 @@ const port = process.env.PORT || 5000;
 app.use(
   cors({
     origin: [
-      "https://app.netlify.com/sites/courageous-liger-ff4d25/deploys/654bc69a1318871b0d7f646c",
+      "http://localhost:5173",
+      "https://654cd2cdca6cbf3d64995395--courageous-liger-ff4d25.netlify.app",
     ],
-    optionSuccessStatus: 200,
     credentials: true,
   })
 );
@@ -31,7 +31,7 @@ const client = new MongoClient(uri, {
   },
 });
 
-const verifyToken = async (req, res, next) => {
+const verifyToken = (req, res, next) => {
   const token = req.cookies?.token;
   console.log("value of token of middleware", token);
   if (!token) {
@@ -62,7 +62,8 @@ async function run() {
       res
         .cookie("token", token, {
           httpOnly: true,
-          secure: false,
+          secure: true,
+          sameSite: "none",
         })
         .send({ success: true });
     });
@@ -82,7 +83,6 @@ async function run() {
       if (level) {
         query = { level: level };
       }
-
       const cursor = assignmentCollection.find(query);
       const result = await cursor.toArray();
       res.send(result);
@@ -129,12 +129,13 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/takeAssignment", verifyToken, async (req, res) => {
-      const { email } = req.query;
-      console.log("token:", req.cookies.token);
-      if (req.query.email !== req.user.email) {
-        return res.status(403).send({ message: "forbidden access" });
-      }
+    app.get("/takeAssignment", async (req, res) => {
+      // const { email } = req.query;
+      // console.log(req.query);
+      // console.log("token:", req.cookies.token);
+      // if (req.query.email !== req.user.email) {
+      //   return res.status(403).send({ message: "forbidden access" });
+      // }
       let query = {};
       if (req.query?.email) {
         query = { email: req.query.email };
