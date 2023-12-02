@@ -4,6 +4,7 @@ require("dotenv").config();
 const cookieParser = require("cookie-parser");
 var jwt = require("jsonwebtoken");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const { log } = require("console");
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -142,6 +143,7 @@ async function run() {
       }
       console.log(query);
       const cursor = takeAssignmentCollection.find(query);
+      console.log(cursor);
       const result = await cursor.toArray();
       res.send(result);
     });
