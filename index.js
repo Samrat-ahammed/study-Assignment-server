@@ -14,7 +14,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://654cd2cdca6cbf3d64995395--courageous-liger-ff4d25.netlify.app",
+      "https://656d6e0b4cdb7d1026eec601--glittering-marshmallow-7f96ac.netlify.app",
     ],
     credentials: true,
   })
@@ -34,7 +34,7 @@ const client = new MongoClient(uri, {
 
 const verifyToken = (req, res, next) => {
   const token = req.cookies?.token;
-  console.log("value of token of middleware", token);
+  // console.log("value of token of middleware", token);
   if (!token) {
     return res.status(401).send({ message: "forbidden" });
   }
@@ -42,7 +42,7 @@ const verifyToken = (req, res, next) => {
     if (err) {
       return res.status(401).send({ message: "unauthorized" });
     }
-    console.log("value in token ", decode);
+    // console.log("value in token ", decode);
     req.user = decode;
     next();
   });
@@ -55,7 +55,7 @@ async function run() {
 
     app.post("/jwt", async (req, res) => {
       const user = req.body;
-      console.log(user);
+      // console.log(user);
 
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "1h",
@@ -84,8 +84,27 @@ async function run() {
       if (level) {
         query = { level: level };
       }
+
       const cursor = assignmentCollection.find(query);
       const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.get("/allAssignmentCount", async (req, res) => {
+      const count = await assignmentCollection.estimatedDocumentCount();
+      res.send({ count });
+    });
+
+    app.get("/allAssignmentPagination", async (req, res) => {
+      const page = parseInt(req.query.page);
+      const size = parseInt(req.query.size);
+
+      // console.log("pagination query",page, size)
+      const result = await assignmentCollection
+        .find()
+        .skip(page * size)
+        .limit(size)
+        .toArray();
       res.send(result);
     });
 
@@ -139,11 +158,11 @@ async function run() {
       // }
       let query = {};
       if (req.query?.email) {
-        query = { email: req.query.email };
+        query = { email: req.query?.email };
       }
-      console.log(query);
+      console.log({ query });
       const cursor = takeAssignmentCollection.find(query);
-      console.log(cursor);
+      // console.log(cursor);
       const result = await cursor.toArray();
       res.send(result);
     });
@@ -196,7 +215,7 @@ async function run() {
 
     app.post("/user", async (req, res) => {
       const user = req.body;
-      console.log(user);
+      // console.log(user);
       const result = await userCollection.insertOne(user);
       res.send(result);
     });
